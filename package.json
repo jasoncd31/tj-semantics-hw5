@@ -1,0 +1,27 @@
+{
+  "name": "tj-semantics-hw5",
+  "version": "1.0.0",
+  "description": "This is a repo for the 5th homework for CMSI5850",
+  "main": "bella.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jasoncd31/tj-semantics-hw5.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jasoncd31/tj-semantics-hw5/issues"
+  },
+  "homepage": "https://github.com/jasoncd31/tj-semantics-hw5#readme",
+  "dependencies": {
+    "@types/node": "^18.16.3",
+    "tsc": "^2.0.4",
+    "typescript": "^5.0.4"
+  }
+}
