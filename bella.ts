@@ -14,14 +14,14 @@ type Value = number
 
 let memory = new Map<string, Value>();
 
-class Program {
+export class Program {
     constructor(public block: Block) { }
     interpret() {
         return this.block.interpret();
     }
 }
 
-class Block {
+export class Block {
     constructor(public statements: Statement[]) { }
     interpret() {
         for (let statement of this.statements) {
@@ -34,7 +34,7 @@ interface Statement {
     interpret(): void;
 }
 
-class VariableDeclaration implements Statement {
+export class VariableDeclaration implements Statement {
     constructor(public id: Identifier, public type: Expression) { }
     interpret(): void {
         if (memory.has(this.id.name)) {
@@ -44,7 +44,7 @@ class VariableDeclaration implements Statement {
     }
 }
 
-class FunctionDeclaration implements Statement {
+export class FunctionDeclaration implements Statement {
     constructor(
         public id: Identifier,
         public parameters: Identifier[],
@@ -58,7 +58,7 @@ class FunctionDeclaration implements Statement {
     }
 }
 
-class Assignment implements Statement {
+export class Assignment implements Statement {
     constructor(public id: Identifier, public expression: Expression) { }
     interpret(): void {
         if (!memory.has(this.id.name)) {
@@ -68,14 +68,14 @@ class Assignment implements Statement {
     }
 }
 
-class PrintStatement implements Statement {
+export class PrintStatement implements Statement {
     constructor(public expression: Expression) { }
     interpret(): void {
         console.log(this.expression.interpret());
     }
 }
 
-class WhileStatement implements Statement {
+export class WhileStatement implements Statement {
     constructor(public expression: Expression, public block: Block) { }
     interpret(): void {
         while (this.expression.interpret()) {
@@ -88,33 +88,37 @@ interface Expression {
     interpret(): Value;
 }
 
-class Numeral implements Expression {
+export class Numeral implements Expression {
     constructor(public value: number) { }
     interpret(): number {
         return this.value;
     }
 }
 
-class Identifier implements Expression {
+export class Identifier implements Expression {
     constructor(public name: string) { }
     interpret(): Value {
         if (!memory.has(this.name)) {
             throw new Error("Variable " + this.name + " not declared");
         }
         else{
-            return memory.get(this.name);
+            const value = memory.get(this.name);
+            if (value === undefined) {
+                throw new Error("Variable " + this.name + " has no value");
+            }
+            return value;
         }
     }
 }
 
-class BooleanLiteral implements Expression {
+export class BooleanLiteral implements Expression {
     constructor(public value: boolean) { }
     interpret(): Value {
         return this.value;
     }
 }
 
-class UnaryExpression implements Expression {
+export class UnaryExpression implements Expression {
     constructor(public operator: string, public expression: Expression) { }
     interpret(): number | boolean {
         switch (this.operator) {
@@ -128,10 +132,22 @@ class UnaryExpression implements Expression {
     }
 }
 
-class BinaryExpression implements Expression {
-    constructor(public operator: string, public left: Expression, public right: Expression) { }
+export class BinaryExpression implements Expression {
+    constructor(public left: Expression, public operator: string, public right: Expression) { }
     interpret() {
         switch (this.operator) {
+            case "+":
+                return (this.left.interpret() as number) + (this.right.interpret() as number);
+            case "-":
+                return (this.left.interpret() as number) - (this.right.interpret() as number);
+            case "*":
+                return (this.left.interpret() as number) * (this.right.interpret() as number);
+            case "/":
+                return (this.left.interpret() as number) / (this.right.interpret() as number);
+            case "%":
+                return (this.left.interpret() as number) % (this.right.interpret() as number);
+            case "**":
+                return (this.left.interpret() as number) ** (this.right.interpret() as number);
             case "<":
                 return this.left.interpret() < this.right.interpret();
             case ">":
@@ -155,7 +171,7 @@ class BinaryExpression implements Expression {
 }
 
 
-class CallExpression implements Expression {
+export class CallExpression implements Expression {
     constructor(public name: Identifier, public args: Expression[]) { }
     interpret(): Value {
         const value = this.name.interpret();
@@ -174,7 +190,7 @@ class CallExpression implements Expression {
     }
 }
 
-class ConditionalExpression implements Expression {
+export class ConditionalExpression implements Expression {
     constructor(
         public test: Expression,
         public consequent: Expression,
@@ -189,26 +205,26 @@ class ConditionalExpression implements Expression {
     }
 }
 
-class ArrayLiteral implements Expression {
+export class ArrayLiteral implements Expression {
     constructor(public elements: Expression[]) { }
     interpret(): Value[] {
         return this.elements.map((element) => element.interpret());
     }
 }
 
-class SubscriptExpression implements Expression {
+export class SubscriptExpression implements Expression {
     constructor(public array: Expression, public subscript: Expression) { }
-    interpret(): boolean | number | Value[] {
-        const arrayValue = this.array.interpret();
+    interpret(): Value {
+        const arrayValue : Value = this.array.interpret();
         const subscriptValue = this.subscript.interpret();
         if (typeof subscriptValue !== "number") {
             throw new Error("Subscript must be a number");
         }
-        else if (!Array.isArray(arrayValue)) {
+        else if (typeof arrayValue !== "object") {
             throw new Error("Subscripted expression must be an array");
         }
         else {
-            return arrayValue[subscriptValue];
+            return (arrayValue[subscriptValue] as Value);
         }
     }
 }
@@ -219,7 +235,7 @@ const sample: Program = new Program(
     new Block([
         new PrintStatement(new UnaryExpression("-", new Numeral(5))),
         new PrintStatement(
-            new BinaryExpression("*", new Numeral(5), new Numeral(8))
+            new BinaryExpression(new Numeral(5),"*",new Numeral(8))
         ),
     ])
 );
@@ -233,7 +249,7 @@ const helloWorld: Program = new Program(
 
 //console.log(util.inspect(sample, false, null, true /* enable colors */));
 
-function interpret(p: Program) {
+export function interpret(p: Program) {
     return p.interpret();
 }
 

@@ -5,7 +5,7 @@
   "main": "bella.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "c8 node_modules/.bin/mocha",
     "tsc": "tsc"
   },
   "repository": {
@@ -21,6 +21,8 @@
   "homepage": "https://github.com/jasoncd31/tj-semantics-hw5#readme",
   "dependencies": {
     "@types/node": "^18.16.3",
+    "c8": "^7.13.0",
+    "mocha": "^10.2.0",
     "tsc": "^2.0.4",
     "typescript": "^5.0.4"
   }

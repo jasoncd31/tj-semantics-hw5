@@ -6,7 +6,7 @@
 // b: Block = block s*
 // p: Program = program b
 let memory = new Map();
-class Program {
+export class Program {
     block;
     constructor(block) {
         this.block = block;
@@ -15,7 +15,7 @@ class Program {
         return this.block.interpret();
     }
 }
-class Block {
+export class Block {
     statements;
     constructor(statements) {
         this.statements = statements;
@@ -26,7 +26,7 @@ class Block {
         }
     }
 }
-class VariableDeclaration {
+export class VariableDeclaration {
     id;
     type;
     constructor(id, type) {
@@ -40,7 +40,7 @@ class VariableDeclaration {
         memory.set(this.id.name, this.type.interpret());
     }
 }
-class FunctionDeclaration {
+export class FunctionDeclaration {
     id;
     parameters;
     expression;
@@ -56,7 +56,7 @@ class FunctionDeclaration {
         memory.set(this.id.name, [this.parameters, this.expression]);
     }
 }
-class Assignment {
+export class Assignment {
     id;
     expression;
     constructor(id, expression) {
@@ -70,7 +70,7 @@ class Assignment {
         memory.set(this.id.name, this.expression.interpret());
     }
 }
-class PrintStatement {
+export class PrintStatement {
     expression;
     constructor(expression) {
         this.expression = expression;
@@ -79,7 +79,7 @@ class PrintStatement {
         console.log(this.expression.interpret());
     }
 }
-class WhileStatement {
+export class WhileStatement {
     expression;
     block;
     constructor(expression, block) {
@@ -92,7 +92,7 @@ class WhileStatement {
         }
     }
 }
-class Numeral {
+export class Numeral {
     value;
     constructor(value) {
         this.value = value;
@@ -101,7 +101,7 @@ class Numeral {
         return this.value;
     }
 }
-class Identifier {
+export class Identifier {
     name;
     constructor(name) {
         this.name = name;
@@ -111,11 +111,15 @@ class Identifier {
             throw new Error("Variable " + this.name + " not declared");
         }
         else {
-            return memory.get(this.name);
+            const value = memory.get(this.name);
+            if (value === undefined) {
+                throw new Error("Variable " + this.name + " has no value");
+            }
+            return value;
         }
     }
 }
-class BooleanLiteral {
+export class BooleanLiteral {
     value;
     constructor(value) {
         this.value = value;
@@ -124,7 +128,7 @@ class BooleanLiteral {
         return this.value;
     }
 }
-class UnaryExpression {
+export class UnaryExpression {
     operator;
     expression;
     constructor(operator, expression) {
@@ -142,17 +146,29 @@ class UnaryExpression {
         }
     }
 }
-class BinaryExpression {
-    operator;
+export class BinaryExpression {
     left;
+    operator;
     right;
-    constructor(operator, left, right) {
-        this.operator = operator;
+    constructor(left, operator, right) {
         this.left = left;
+        this.operator = operator;
         this.right = right;
     }
     interpret() {
         switch (this.operator) {
+            case "+":
+                return this.left.interpret() + this.right.interpret();
+            case "-":
+                return this.left.interpret() - this.right.interpret();
+            case "*":
+                return this.left.interpret() * this.right.interpret();
+            case "/":
+                return this.left.interpret() / this.right.interpret();
+            case "%":
+                return this.left.interpret() % this.right.interpret();
+            case "**":
+                return this.left.interpret() ** this.right.interpret();
             case "<":
                 return this.left.interpret() < this.right.interpret();
             case ">":
@@ -174,7 +190,7 @@ class BinaryExpression {
         }
     }
 }
-class CallExpression {
+export class CallExpression {
     name;
     args;
     constructor(name, args) {
@@ -197,7 +213,7 @@ class CallExpression {
         }
     }
 }
-class ConditionalExpression {
+export class ConditionalExpression {
     test;
     consequent;
     alternate;
@@ -215,7 +231,7 @@ class ConditionalExpression {
         }
     }
 }
-class ArrayLiteral {
+export class ArrayLiteral {
     elements;
     constructor(elements) {
         this.elements = elements;
@@ -224,7 +240,7 @@ class ArrayLiteral {
         return this.elements.map((element) => element.interpret());
     }
 }
-class SubscriptExpression {
+export class SubscriptExpression {
     array;
     subscript;
     constructor(array, subscript) {
@@ -237,7 +253,7 @@ class SubscriptExpression {
         if (typeof subscriptValue !== "number") {
             throw new Error("Subscript must be a number");
         }
-        else if (!Array.isArray(arrayValue)) {
+        else if (typeof arrayValue !== "object") {
             throw new Error("Subscripted expression must be an array");
         }
         else {
@@ -248,14 +264,13 @@ class SubscriptExpression {
 //Run the interpreter
 const sample = new Program(new Block([
     new PrintStatement(new UnaryExpression("-", new Numeral(5))),
-    new PrintStatement(new BinaryExpression("*", new Numeral(5), new Numeral(8))),
+    new PrintStatement(new BinaryExpression(new Numeral(5), "*", new Numeral(8))),
 ]));
 const helloWorld = new Program(new Block([
     new PrintStatement(new Numeral(0x07734))
 ]));
 //console.log(util.inspect(sample, false, null, true /* enable colors */));
-function interpret(p) {
+export function interpret(p) {
     return p.interpret();
 }
 interpret(helloWorld);
-export {};
